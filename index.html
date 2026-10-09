@@ -37,8 +37,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const certId = urlParams.get('id');
 
-        // Your active Google Apps Script Web App URL
-        const scriptURL = "https://script.google.com/macros/s/AKfycbwIrSXMr_V69xbSh3aiGRYc2hm8_IT6LbCJNKOAaJZIr2TBuP_1P278ZSbAa3kdaLMzPA/exec?id=" + certId;
+        // Your new Version 4 Web App URL is plugged in here:
+        const scriptURL = "https://script.google.com/macros/s/AKfycbyd-R8m1i4YiCuJTF5lVi341oQGXpgJFLZ8rMGtD9gYim_OS3UxircIroKnx_5KHK_a/exec?id=" + certId;
 
         if (!certId) {
             document.getElementById('loadingText').innerText = "No Certificate ID provided.";
@@ -47,10 +47,9 @@
                 .then(response => response.json())
                 .then(data => {
                     if (!data || !data.imageUrl) {
-                        document.getElementById('loadingText').innerText = "Certificate not found.";
+                        document.getElementById('loadingText').innerText = data.error || "Certificate not found.";
                         return;
                     }
-                    // Inject the generated slide image directly into the container
                     document.getElementById('certBox').innerHTML = `<img src="${data.imageUrl}" alt="Assay Certificate">`;
                 })
                 .catch(error => {

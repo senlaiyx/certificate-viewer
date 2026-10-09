@@ -6,167 +6,38 @@
     <title>Certificate of Assay</title>
     <style>
         body { 
-            font-family: Arial, sans-serif; 
-            background: #f4f4f4; 
+            background: #111; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
             margin: 0; 
         }
-        .certificate { 
-            background: white; 
-            padding: 50px 40px; 
-            border: 4px solid #111; 
-            outline: 6px solid #d4af37; /* Gold outer border look */
-            outline-offset: 4px;
-            width: 450px; 
-            text-align: center; 
-            box-shadow: 0px 4px 20px rgba(0,0,0,0.15); 
-            box-sizing: border-box;
-        }
-        .logo-circle {
-            width: 90px;
-            height: 90px;
-            border: 3px solid #b87333;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 20px auto;
-            color: #b87333;
-            font-size: 50px;
-            font-weight: bold;
-            font-family: Georgia, serif;
-        }
-        h1 { 
-            color: #111; 
-            letter-spacing: 3px;
-            font-size: 26px;
-            margin-bottom: 35px; 
-            font-weight: bold;
-        }
-        .details { 
-            text-align: left; 
-            margin: 0 auto; 
-            font-size: 16px; 
-            line-height: 2.2; 
-        }
-        .row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        .label {
-            color: #111;
-            font-weight: normal;
-            flex: 1;
-        }
-        .colon {
-            padding: 0 10px;
-            font-weight: bold;
-        }
-        .value {
-            flex: 1.2;
-            font-weight: bold;
-            color: #111;
-        }
-        .footer-section {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        .ea-badge {
-            border: 2px solid #111;
-            border-radius: 12px;
-            padding: 8px 12px;
-            display: inline-block;
+        .cert-container { 
             text-align: center;
+            max-width: 500px; 
+            width: 100%; 
         }
-        .ea-logo-text {
-            font-size: 22px;
-            font-weight: bold;
-            line-height: 1;
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.6);
         }
-        .ea-logo-text span:first-child { color: #e63946; }
-        .ea-logo-text span:last-child { color: #111; }
-        .ea-sub {
-            font-size: 11px;
-            margin-top: 4px;
-            font-weight: bold;
-            color: #111;
-        }
-        .signature-text {
-            font-family: 'Brush Script MT', cursive, sans-serif;
-            font-size: 24px;
-            color: #111;
-        }
-        .loading { font-size: 18px; color: #666; padding: 40px; }
+        .loading { font-family: Arial, sans-serif; font-size: 18px; color: #fff; }
     </style>
 </head>
 <body>
 
-    <div class="certificate" id="certBox">
-        <div class="loading" id="loadingText">Loading certificate...</div>
-        <div id="content" style="display: none;">
-            
-            <div class="logo-circle">E</div>
-            <h1>CERTIFICATE</h1>
-
-            <div class="details">
-                <div class="row">
-                    <span class="label">Certificate Number</span>
-                    <span class="colon">:</span>
-                    <span class="value" id="val_cert"></span>
-                </div>
-                <div class="row">
-                    <span class="label">Weight</span>
-                    <span class="colon">:</span>
-                    <span class="value" id="val_weight"></span>
-                </div>
-                <div class="row">
-                    <span class="label">Width</span>
-                    <span class="colon">:</span>
-                    <span class="value" id="val_width"></span>
-                </div>
-                <div class="row">
-                    <span class="label">Length</span>
-                    <span class="colon">:</span>
-                    <span class="value" id="val_length"></span>
-                </div>
-                <div class="row">
-                    <span class="label">Thickness</span>
-                    <span class="colon">:</span>
-                    <span class="value" id="val_thickness"></span>
-                </div>
-                <div class="row">
-                    <span class="label">Fineness</span>
-                    <span class="colon">:</span>
-                    <span class="value" id="val_fineness"></span>
-                </div>
-                <div class="row">
-                    <span class="label">Certificate Assayer</span>
-                    <span class="colon">:</span>
-                    <span class="value"><span class="signature-text">Sw</span></span>
-                </div>
-            </div>
-
-            <div class="footer-section">
-                <div class="ea-badge">
-                    <div class="ea-logo-text"><span>ea</span></div>
-                    <div class="ea-sub">Emas Assayer</div>
-                </div>
-            </div>
-
-        </div>
+    <div class="cert-container" id="certBox">
+        <div class="loading" id="loadingText">Generating your certificate...</div>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const certId = urlParams.get('id');
 
-        // Your Google Apps Script Web App URL
+        // Your active Google Apps Script Web App URL
         const scriptURL = "https://script.google.com/macros/s/AKfycbwIrSXMr_V69xbSh3aiGRYc2hm8_IT6LbCJNKOAaJZIr2TBuP_1P278ZSbAa3kdaLMzPA/exec?id=" + certId;
 
         if (!certId) {
@@ -175,22 +46,15 @@
             fetch(scriptURL)
                 .then(response => response.json())
                 .then(data => {
-                    if (!data || !data["Certificate Number"]) {
+                    if (!data || !data.imageUrl) {
                         document.getElementById('loadingText').innerText = "Certificate not found.";
                         return;
                     }
-                    document.getElementById('val_cert').innerText = data["Certificate Number"] || "";
-                    document.getElementById('val_weight').innerText = data["Weight"] ? data["Weight"] + "g" : "";
-                    document.getElementById('val_width').innerText = data["Width"] ? data["Width"] + "mm" : "";
-                    document.getElementById('val_length').innerText = data["Length"] ? data["Length"] + "mm" : "";
-                    document.getElementById('val_thickness').innerText = data["Thickness"] ? data["Thickness"] + "mm" : "";
-                    document.getElementById('val_fineness').innerText = data["Fineness"] ? "Au" + data["Fineness"] : "";
-
-                    document.getElementById('loadingText').style.display = 'none';
-                    document.getElementById('content').style.display = 'block';
+                    // Inject the generated slide image directly into the container
+                    document.getElementById('certBox').innerHTML = `<img src="${data.imageUrl}" alt="Assay Certificate">`;
                 })
                 .catch(error => {
-                    document.getElementById('loadingText').innerText = "Error loading certificate data.";
+                    document.getElementById('loadingText').innerText = "Error loading certificate.";
                     console.error(error);
                 });
         }

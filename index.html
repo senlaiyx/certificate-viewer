@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assay Certificate</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .certificate { background: white; padding: 40px; border: 5px solid #d4af37; width: 600px; text-align: center; box-shadow: 0px 0px 15px rgba(0,0,0,0.1); }
+        h1 { color: #333; margin-bottom: 20px; }
+        .details { text-align: left; margin-top: 30px; font-size: 18px; line-height: 1.8; }
+        .loading { font-size: 20px; color: #666; }
+    </style>
+</head>
+<body>
+
+    <div class="certificate" id="certBox">
+        <div class="loading" id="loadingText">Loading certificate...</div>
+        <div id="content" style="display: none;">
+            <h1>CERTIFICATE OF ASSAY</h1>
+            <div class="details">
+                <p><strong>Certificate Number:</strong> <span id="val_cert"></span></p>
+                <p><strong>Date:</strong> <span id="val_date"></span></p>
+                <p><strong>Weight:</strong> <span id="val_weight"></span></p>
+                <p><strong>Width:</strong> <span id="val_width"></span></p>
+                <p><strong>Length:</strong> <span id="val_length"></span></p>
+                <p><strong>Thickness:</strong> <span id="val_thickness"></span></p>
+                <p><strong>Fineness:</strong> <span id="val_fineness"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get the 'id' parameter from the URL (e.g., index.html?id=E123)
+        const urlParams = new URLSearchParams(window.location.search);
+        const certId = urlParams.get('id');
+
+        // Your deployed Google Apps Script Web App URL
+        const scriptURL = "https://script.google.com/macros/s/AKfycbwIrSXMr_V69xbSh3aiGRYc2hm8_IT6LbCJNKOAaJZIr2TBuP_1P278ZSbAa3kdaLMzPA/exec?id=" + certId;
+
+        if (!certId) {
+            document.getElementById('loadingText').innerText = "No Certificate ID provided.";
+        } else {
+            fetch(scriptURL)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || !data["Certificate Number"]) {
+                        document.getElementById('loadingText').innerText = "Certificate not found.";
+                        return;
+                    }
+                    // Populate HTML elements with data from Google Sheets headers
+                    document.getElementById('val_cert').innerText = data["Certificate Number"] || "";
+                    document.getElementById('val_date').innerText = data["Date"] || "";
+                    document.getElementById('val_weight').innerText = data["Weight"] || "";
+                    document.getElementById('val_width').innerText = data["Width"] || "";
+                    document.getElementById('val_length').innerText = data["Length"] || "";
+                    document.getElementById('val_thickness').innerText = data["Thickness"] || "";
+                    document.getElementById('val_fineness').innerText = data["Fineness"] || "";
+
+                    // Hide loading and show certificate
+                    document.getElementById('loadingText').style.display = 'none';
+                    document.getElementById('content').style.display = 'block';
+                })
+                .catch(error => {
+                    document.getElementById('loadingText').innerText = "Error loading certificate data.";
+                    console.error(error);
+                });
+    </script>
+</body>
+</html>

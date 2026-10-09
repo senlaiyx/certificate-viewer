@@ -1,62 +1,71 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate of Assay</title>
-    <style>
-        body { 
-            background: #111; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-        }
-        .cert-container { 
-            text-align: center;
-            max-width: 500px; 
-            width: 100%; 
-        }
-        img {
-            width: 100%;
-            height: auto;
-            border-radius: 4px;
-            box-shadow: 0px 10px 30px rgba(0,0,0,0.6);
-        }
-        .loading { font-family: Arial, sans-serif; font-size: 18px; color: #fff; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Certificate</title>
+<style>
+  body { margin: 0; background: #e9e9e9; display: flex; justify-content: center; }
+  /* Slide is portrait, about 369 x 718 */
+  #cert {
+    position: relative; width: 100%; max-width: 520px;
+    aspect-ratio: 369 / 718;
+    background: url('template.png') center / 100% 100% no-repeat;
+    container-type: inline-size;
+    font-family: Arial, Helvetica, sans-serif; color: #000;
+  }
+  .v {
+    position: absolute; left: 62.9%; transform: translateY(-50%);
+    font-size: 4.8cqw; white-space: nowrap; visibility: hidden;
+  }
+  #cert.ready .v { visibility: visible; }
+  /* vertical centre of each row, as % of slide height */
+  #certNo    { top: 43.5%; }
+  #weight    { top: 48.6%; }
+  #width     { top: 53.9%; }
+  #length    { top: 59.3%; }
+  #thickness { top: 64.5%; }
+  #fineness  { top: 69.9%; }
+  #msg { position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+         font-size: 5cqw; text-align: center; background: rgba(255,255,255,.9); }
+</style>
 </head>
 <body>
+<div id="cert">
+  <div class="v" id="certNo"></div>
+  <div class="v" id="weight"></div>
+  <div class="v" id="width"></div>
+  <div class="v" id="length"></div>
+  <div class="v" id="thickness"></div>
+  <div class="v" id="fineness"></div>
+  <div id="msg"></div>
+</div>
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbzmRAOc8CT05-5dMfs2JwoQzb3spMXB1h1x-RDJPyl0-8rczRkb_Uy_tGWrCaIyrnGWcA/exec';
+const MAP = {
+  certNo: 'Certificate Number', weight: 'Weight', width: 'Width',
+  length: 'Length', thickness: 'Thickness', fineness: 'Fineness'
+};
+const cert = document.getElementById('cert');
+const msg = document.getElementById('msg');
+function showMsg(t) { msg.textContent = t; msg.style.display = 'flex'; }
 
-    <div class="cert-container" id="certBox">
-        <div class="loading" id="loadingText">Generating your certificate...</div>
-    </div>
-
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const certId = urlParams.get('id');
-
-        // Your new Version 4 Web App URL is plugged in here:
-        const scriptURL = "https://script.google.com/macros/s/AKfycbyd-R8m1i4YiCuJTF5lVi341oQGXpgJFLZ8rMGtD9gYim_OS3UxircIroKnx_5KHK_a/exec?id=" + certId;
-
-        if (!certId) {
-            document.getElementById('loadingText').innerText = "No Certificate ID provided.";
-        } else {
-            fetch(scriptURL)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data || !data.imageUrl) {
-                        document.getElementById('loadingText').innerText = data.error || "Certificate not found.";
-                        return;
-                    }
-                    document.getElementById('certBox').innerHTML = `<img src="${data.imageUrl}" alt="Assay Certificate">`;
-                })
-                .catch(error => {
-                    document.getElementById('loadingText').innerText = "Error loading certificate.";
-                    console.error(error);
-                });
-        }
-    </script>
+const id = new URLSearchParams(location.search).get('id');
+if (!id) {
+  showMsg('No certificate specified');
+} else {
+  fetch(API + '?id=' + encodeURIComponent(id))
+    .then(r => r.json())
+    .then(d => {
+      if (d.error) return showMsg('Certificate not found');
+      for (const [elId, field] of Object.entries(MAP)) {
+        // The colon is drawn here, so delete it from the slide image
+        document.getElementById(elId).textContent = ': ' + (d[field] ?? '');
+      }
+      cert.classList.add('ready');
+    })
+    .catch(() => showMsg('Unable to load certificate'));
+}
+</script>
 </body>
 </html>
